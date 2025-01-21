@@ -1,2 +1,2 @@
 # sem-6
-semest 6 labs
+semester 6 labs
