@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Bio-Data Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student Bio-Data Form</h1>
+        <form action="#" method="post">
+            <!-- Personal Information Section -->
+            <div class="section">
+                <h2>Personal Information</h2>
+                <div class="item">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="item">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="item">
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+                <div class="item">
+                    <label>Gender:</label>
+                    <label for="male">
+                        <input type="radio" id="male" name="gender" value="Male"> Male
+                    </label>
+                    <label for="female">
+                        <input type="radio" id="female" name="gender" value="Female"> Female
+                    </label>
+                </div>
+            </div>
+
+            <!-- Address Section -->
+            <div class="section">
+                <h2>Address</h2>
+                <div class="item">
+                    <label for="address">Address:</label>
+                    <textarea id="address" name="address" required></textarea>
+                </div>
+                <div class="item">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" required>
+                </div>
+                <div class="item">
+                    <label for="postalCode">Postal Code:</label>
+                    <input type="text" id="postalCode" name="postalCode" required>
+                </div>
+            </div>
+
+            <!-- Subjects Section -->
+            <div class="section">
+                <h2>Subjects</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mathematics</td>
+                            <td><input type="checkbox" name="subject" value="Mathematics"></td>
+                        </tr>
+                        <tr>
+                            <td>Science</td>
+                            <td><input type="checkbox" name="subject" value="Science"></td>
+                        </tr>
+                        <tr>
+                            <td>English</td>
+                            <td><input type="checkbox" name="subject" value="English"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="section">
+                <button type="submit" class="btn-submit">Submit</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

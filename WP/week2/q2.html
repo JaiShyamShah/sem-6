@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Page Layout</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #e9ecef;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .input-group-addon {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-group button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="section bg-info p-4 rounded">
+        <h1 class="text-center text-white">Welcome to Our Page!</h1>
+        <p class="text-center text-white">Below are interactive elements like input groups, buttons, and badges. Try them out!</p>
+        
+        <div class="input-group mb-4">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon2">#</span>
+            </div>
+            <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <span class="badge badge-primary">Verified</span>
+            </div>
+        </div>
+        
+        <div class="btn-group" role="group" aria-label="Action buttons">
+            <button type="button" class="btn btn-danger">Action 1</button>
+            <button type="button" class="btn btn-warning">Action 2</button>
+            <button type="button" class="btn btn-success">Action 3</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 section bg-light p-4 rounded">
+            <h4>Left Section</h4>
+            <p>Enter your email to receive updates:</p>
+            <div class="input-group">
+                <input type="email" class="form-control" placeholder="Email Address">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" type="button">Subscribe</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 section bg-light p-4 rounded">
+            <h4>Center Section</h4>
+            <p>Select an option:</p>
+            <div class="input-group">
+                <select class="custom-select">
+                    <option selected>Choose an option...</option>
+                    <option value="1">First Option</option>
+                    <option value="2">Second Option</option>
+                    <option value="3">Third Option</option>
+                </select>
+                <div class="input-group-append">
+                    <span class="badge badge-info">New</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 section bg-light p-4 rounded">
+            <h4>Right Section</h4>
+            <p>Leave us a message:</p>
+            <textarea class="form-control" rows="3" placeholder="Write your message"></textarea>
+            <button type="button" class="btn btn-primary mt-3">Send Message</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
