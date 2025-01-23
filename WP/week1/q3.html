@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Winter Vacation Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1e3d58;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+        }
+        .video-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .video-gallery video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Share Your Winter Vacation Videos</h1>
+    <p>Upload your winter adventures and relive the magic of snowy memories!</p>
+</header>
+
+<div class="container">
+    <section class="video-gallery">
+        <h2>Winter Vacation Video Gallery</h2>
+        <video controls>
+            <source src="./video1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <video controls>
+            <source src="./video2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <video controls>
+            <source src="./video3.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </section>
+</div>
+
+</body>
+</html>
