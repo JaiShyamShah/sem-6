@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Quiz</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Main container */
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px 50px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Header styling */
+        h1 {
+            color: #4A90E2;
+            font-size: 2.4em;
+            margin-bottom: 30px;
+        }
+
+        /* Question styling */
+        .question {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        /* Answer options */
+        .answers {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .answers label {
+            font-size: 1em;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .answers input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .answers label:hover {
+            transform: scale(1.05);
+        }
+
+        /* Button styling */
+        #submit-btn {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 30px;
+        }
+
+        #submit-btn:hover {
+            background-color: #357ABD;
+            transform: translateY(-2px);
+        }
+
+        /* Result styling */
+        #result {
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 25px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .question {
+                font-size: 1em;
+            }
+
+            #submit-btn {
+                font-size: 1em;
+                padding: 10px 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online Quiz</h1>
+        <div id="quiz-container">
+            <!-- Questions will be injected here -->
+        </div>
+        <button id="submit-btn">Submit Quiz</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Define quiz questions and answers
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                answers: [
+                    { text: "Berlin", correct: false },
+                    { text: "Madrid", correct: false },
+                    { text: "Paris", correct: true },
+                    { text: "Rome", correct: false }
+                ]
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                answers: [
+                    { text: "Earth", correct: false },
+                    { text: "Mars", correct: true },
+                    { text: "Venus", correct: false },
+                    { text: "Jupiter", correct: false }
+                ]
+            },
+            {
+                question: "Who developed the theory of relativity?",
+                answers: [
+                    { text: "Isaac Newton", correct: false },
+                    { text: "Albert Einstein", correct: true },
+                    { text: "Nikola Tesla", correct: false },
+                    { text: "Galileo Galilei", correct: false }
+                ]
+            }
+        ];
+
+        // Render the quiz questions and answers
+        function renderQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            questions.forEach((q, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('question');
+                questionElement.innerHTML = `
+                    <p>${q.question}</p>
+                    <div class="answers">
+                        ${q.answers.map((answer, i) => `
+                            <label>
+                                <input type="radio" name="q${index}" value="${i}" /> ${answer.text}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                quizContainer.appendChild(questionElement);
+            });
+        }
+
+        // Calculate the quiz score
+        function calculateScore() {
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selectedAnswer = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedAnswer) {
+                    const answerIndex = parseInt(selectedAnswer.value);
+                    if (q.answers[answerIndex].correct) {
+                        score++;
+                    }
+                }
+            });
+            return score;
+        }
+
+        // Display the result
+        function showResult(score) {
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `You scored <span style="color: #4A90E2">${score}</span> out of ${questions.length}!`;
+        }
+
+        // Event listener for submit button
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const score = calculateScore();
+            showResult(score);
+        });
+
+        // Initialize the quiz
+        renderQuiz();
+    </script>
+</body>
+</html>

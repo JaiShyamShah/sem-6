@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container for form */
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            display: block;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Button styling */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Result styling */
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .result span {
+            font-weight: bold;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .container {
+                width: 90%;
+                padding: 30px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            input, button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Grade Calculator</h2>
+        <label for="subject1">Subject 1:</label>
+        <input type="number" id="subject1" placeholder="Enter marks" required>
+        
+        <label for="subject2">Subject 2:</label>
+        <input type="number" id="subject2" placeholder="Enter marks" required>
+        
+        <label for="subject3">Subject 3:</label>
+        <input type="number" id="subject3" placeholder="Enter marks" required>
+        
+        <label for="subject4">Subject 4:</label>
+        <input type="number" id="subject4" placeholder="Enter marks" required>
+        
+        <button onclick="calculateGrade()">Calculate Grade</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateGrade() {
+            // Get the marks from input fields
+            var subject1 = parseFloat(document.getElementById("subject1").value);
+            var subject2 = parseFloat(document.getElementById("subject2").value);
+            var subject3 = parseFloat(document.getElementById("subject3").value);
+            var subject4 = parseFloat(document.getElementById("subject4").value);
+
+            // Check if all inputs are valid numbers
+            if (isNaN(subject1) || isNaN(subject2) || isNaN(subject3) || isNaN(subject4)) {
+                alert("Please enter valid marks for all subjects.");
+                return;
+            }
+
+            // Calculate the average
+            var average = (subject1 + subject2 + subject3 + subject4) / 4;
+
+            // Determine the grade based on the average
+            var grade = '';
+            if (average > 90) {
+                grade = 'A';
+            } else if (average > 80) {
+                grade = 'B';
+            } else if (average > 70) {
+                grade = 'C';
+            } else if (average > 60) {
+                grade = 'D';
+            } else {
+                grade = 'F'; // For average <= 60
+            }
+
+            // Display the result
+            document.getElementById("result").innerHTML = `
+                <p><span>Average:</span> ${average.toFixed(2)}</p>
+                <p><span>Grade:</span> ${grade}</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Clock & Wishing Program</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .clock {
+            background-color: #ffebcd;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 3rem;
+            color: #2e8b57;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="greeting"></h1>
+        <div class="clock">
+            <h2 id="current-time"></h2>
+        </div>
+    </div>
+
+    <script>
+        // Function to display the current time
+        function updateClock() {
+            const time = new Date();
+            let hours = time.getHours();
+            let minutes = time.getMinutes();
+            let seconds = time.getSeconds();
+
+            // Add leading zero if minutes or seconds are less than 10
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            // Get the formatted time string
+            const currentTime = `${hours}:${minutes}:${seconds}`;
+
+            // Display the time on the webpage
+            document.getElementById('current-time').textContent = currentTime;
+
+            // Display greeting based on the time of the day
+            let greetingMessage = '';
+            if (hours < 12) {
+                greetingMessage = "Good Morning!";
+                alert("Good Morning!");
+            } else if (hours < 18) {
+                greetingMessage = "Good Afternoon!";
+                alert("Good Afternoon!");
+            } else {
+                greetingMessage = "Good Evening!";
+                alert("Good Evening!");
+            }
+
+            // Display greeting message on the webpage
+            document.getElementById('greeting').textContent = greetingMessage;
+        }
+
+        // Update the clock every second
+        setInterval(updateClock, 1000);
+
+        // Call the function once to initialize the clock immediately
+        updateClock();
+    </script>
+</body>
+</html>
