@@ -1,55 +1,85 @@
 import torch
 import torch.nn as nn
-import numpy as np
+import torch.optim as optim
+import torchvision.datasets as datasets
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
 
-# Create a model instance and load it to the appropriate device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-class XORModel(nn.Module):
+# Define the CNN model
+class CNNClassifier(nn.Module):
     def __init__(self):
-        super(XORModel, self).__init__()
-        self.linear1 = nn.Linear(2, 2, bias=True)  # 2 inputs, 2 hidden neurons
-        self.activation1 = nn.ReLU()  # ReLU activation for hidden layer
-        self.linear2 = nn.Linear(2, 1, bias=True)  # 2 hidden neurons, 1 output
-        self.activation2 = nn.ReLU()  # Sigmoid activation for output layer
+        super(CNNClassifier, self).__init__()
+        # Define the layers
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)  # Conv layer
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # Conv layer
+        self.pool = nn.MaxPool2d(2, 2)  # MaxPooling layer
+        self.fc1 = nn.Linear(64 * 7 * 7, 128)  # Fully connected layer
+        self.fc2 = nn.Linear(128, 10)  # Output layer for 10 classes
 
     def forward(self, x):
-        x = self.linear1(x)
-        x = self.activation1(x)  # Apply ReLU activation
-        x = self.linear2(x)
-        x = self.activation2(x)  # Apply Sigmoid activation for output
+        x = self.pool(torch.relu(self.conv1(x)))  # First convolution + relu + pooling
+        x = self.pool(torch.relu(self.conv2(x)))  # Second convolution + relu + pooling
+        x = x.view(-1, 64 * 7 * 7)  # Flatten the output from the conv layers
+        x = torch.relu(self.fc1(x))  # Fully connected layer with ReLU
+        x = self.fc2(x)  # Output layer
         return x
 
 
-# Manually define the input (X) for XOR
-X = torch.tensor([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=torch.float32).to(device)
+# Load the MNIST dataset
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
-# Initialize the model and load it to device (assuming the model is trained)
-model = XORModel().to(device)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-# Extract system-generated weights and biases for Linear1 and Linear2
-w1, b1 = model.linear1.weight.data, model.linear1.bias.data
-w2, b2 = model.linear2.weight.data, model.linear2.bias.data
+# Initialize the model, loss function, and optimizer
+model = CNNClassifier()
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-# Print the extracted values of weights and biases
-print("Linear1 Weights (W1):", w1)
-print("Linear1 Biases (b1):", b1)
-print("Linear2 Weights (W2):", w2)
-print("Linear2 Biases (b2):", b2)
+epochs=5
+# Training loop
+for epoch in range(epochs):  # Run for 5 epochs
+    model.train()
+    total_loss = 0
+    total_correct = 0
+    total_samples = 0
+    for inputs, labels in train_loader:
+        optimizer.zero_grad()  # Clear the gradients
+        outputs = model(inputs)  # Forward pass
+        loss = criterion(outputs, labels)  # Compute the loss
+        loss.backward()  # Backpropagation
+        optimizer.step()  # Update weights
 
-# Step 1: Compute Linear1 output: out1 = X * W1 + b1
-out1 = torch.matmul(X, w1.T) + b1  # Linear transformation
-print("Output after Linear1:", out1)
+        total_loss += loss.item()
+        _, predicted = torch.max(outputs, 1)
+        total_correct += (predicted == labels).sum().item()
+        total_samples += labels.size(0)
 
-# Step 2: Apply ReLU activation: ReLU(out1) = max(0, out1)
-relu_out1 = torch.relu(out1)
-print("Output after ReLU activation:", relu_out1)
+    accuracy = (total_correct / total_samples) * 100
+    print(f'Epoch [{epoch + 1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}, Accuracy: {accuracy:.2f}%')
 
-# Step 3: Compute Linear2 output: out2 = ReLU(out1) * W2 + b2
-out2 = torch.matmul(relu_out1, w2.T) + b2  # Linear transformation
-print("Output after Linear2:", out2)
+# Evaluate the model on the test set
+model.eval()
+total_correct = 0
+total_samples = 0
+with torch.no_grad():  # Disable gradient computation for evaluation
+    for inputs, labels in test_loader:
+        outputs = model(inputs)
+        _, predicted = torch.max(outputs, 1)
+        total_correct += (predicted == labels).sum().item()
+        total_samples += labels.size(0)
 
-# Step 4: Apply Sigmoid activation: Sigmoid(out2) = 1 / (1 + exp(-out2))
-sigmoid_out = torch.sigmoid(out2)
-print("Final Output after Sigmoid activation:", sigmoid_out)
+accuracy = (total_correct / total_samples) * 100
+print(f'Test Accuracy: {accuracy:.2f}%')
+
+print("\nCNN model parameters:")
+# Assuming model is your CNNClassifier instance
+for name, param in model.named_parameters():
+    print(f"Parameter name: {name}, Shape: {param.shape}")
+
+# To calculate the total number of learnable parameters
+total_params = sum(p.numel() for p in model.parameters())
+print(f"\nTotal learnable parameters: {total_params}")
