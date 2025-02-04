@@ -4,98 +4,122 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 
-# Modified CNN Model with fewer parameters
+
 class CNNClassifier(nn.Module):
-    def __init__(self):
+    def __init__(self, conv1_out_channels=32, conv2_out_channels=64, fc1_out_features=20):
         super(CNNClassifier, self).__init__()
-        # Reduced number of filters in the conv layers
-        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, padding=1)  # Conv layer
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)  # Conv layer
-        self.pool = nn.MaxPool2d(2, 2)  # MaxPooling layer
-        # Reduced the number of neurons in the fully connected layer
-        self.fc1 = nn.Linear(32 * 7 * 7, 64)  # Fully connected layer
-        self.fc2 = nn.Linear(64, 10)  # Output layer for 10 classes
+        # Modified: Removed third convolutional layer
+        self.net = nn.Sequential(
+            nn.Conv2d(1, conv1_out_channels, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2), stride=2),
+            nn.Conv2d(conv1_out_channels, conv2_out_channels, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2), stride=2)
+        )
+        self.classification_head = nn.Sequential(
+            nn.Linear(conv2_out_channels*5*5, fc1_out_features, bias=True),  # Adjusted the size
+            nn.ReLU(),
+            nn.Linear(fc1_out_features, 10, bias=True)
+        )
 
     def forward(self, x):
-        x = self.pool(torch.relu(self.conv1(x)))  # First convolution + relu + pooling
-        x = self.pool(torch.relu(self.conv2(x)))  # Second convolution + relu + pooling
-        x = x.view(-1, 32 * 7 * 7)  # Flatten the output from the conv layers
-        x = torch.relu(self.fc1(x))  # Fully connected layer with ReLU
-        x = self.fc2(x)  # Output layer
-        return x
+        features = self.net(x)
+        features = features.view(features.size(0), -1)  # Flatten the features for fully connected layers
+        return self.classification_head(features)
 
-# Load the MNIST dataset
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+])
+
 train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-# Initialize the model, loss function, and optimizer
-model = CNNClassifier()
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-# Training loop with tracking
-epochs = 5
-param_count = []
-accuracy_values = []
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-for epoch in range(epochs):
+
+def train(model, train_loader, criterion, optimizer, epochs=5):
     model.train()
-    total_loss = 0
-    total_correct = 0
-    total_samples = 0
-    for inputs, labels in train_loader:
-        optimizer.zero_grad()  # Clear the gradients
-        outputs = model(inputs)  # Forward pass
-        loss = criterion(outputs, labels)  # Compute the loss
-        loss.backward()  # Backpropagation
-        optimizer.step()  # Update weights
+    for epoch in range(epochs):
+        running_loss = 0.0
+        for images, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
 
-        total_loss += loss.item()
-        _, predicted = torch.max(outputs, 1)
-        total_correct += (predicted == labels).sum().item()
-        total_samples += labels.size(0)
+        print(f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss / len(train_loader)}")
 
-    accuracy = (total_correct / total_samples) * 100
-    accuracy_values.append(accuracy)
 
-    # Track the number of parameters after each epoch
-    total_params = sum(p.numel() for p in model.parameters())
-    param_count.append(total_params)
+def evaluate(model, test_loader):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in test_loader:
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    accuracy = 100 * correct / total
+    return accuracy
 
-    print(f'Epoch [{epoch + 1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}, Accuracy: {accuracy:.2f}%')
 
-# Evaluate the model on the test set
-model.eval()
-total_correct = 0
-total_samples = 0
-with torch.no_grad():  # Disable gradient computation for evaluation
-    for inputs, labels in test_loader:
-        outputs = model(inputs)
-        _, predicted = torch.max(outputs, 1)
-        total_correct += (predicted == labels).sum().item()
-        total_samples += labels.size(0)
+def experiment_with_parameters():
+    results = []
+    filter_configs = [
+        (32, 64, 20),  # Reduced parameters
+        (64, 128, 40),  # More filters
+        (128, 256, 80),  # Even more filters
+    ]
 
-test_accuracy = (total_correct / total_samples) * 100
-print(f'Test Accuracy: {test_accuracy:.2f}%')
+    for conv1_out_channels, conv2_out_channels, fc1_out_features in filter_configs:
+        model = CNNClassifier(conv1_out_channels, conv2_out_channels, fc1_out_features)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Plot percentage drop in parameters vs accuracy
-initial_params = sum(p.numel() for p in CNNClassifier().parameters())
-param_drop_percentage = [(initial_params - count) / initial_params * 100 for count in param_count]
+        train(model, train_loader, criterion, optimizer, epochs=5)
 
-plt.plot(param_drop_percentage, accuracy_values)
-plt.xlabel("Percentage Drop in Parameters")
-plt.ylabel("Accuracy (%)")
-plt.title("Percentage Drop in Parameters vs Accuracy")
+        accuracy = evaluate(model, test_loader)
+
+        num_params = count_parameters(model)
+
+        results.append({
+            'accuracy': accuracy,
+            'num_params': num_params,
+            'conv1_out_channels': conv1_out_channels,
+            'conv2_out_channels': conv2_out_channels,
+            'fc1_out_features': fc1_out_features
+        })
+
+    return results
+
+
+results = experiment_with_parameters()
+
+accuracies = [result['accuracy'] for result in results]
+param_counts = [result['num_params'] for result in results]
+
+initial_params = param_counts[0]
+param_drops = [100 * (initial_params - p) / initial_params for p in param_counts]
+
+plt.figure(figsize=(10, 6))
+plt.plot(param_drops, accuracies, marker='o', linestyle='-', color='b')
+plt.title('Percentage Drop in Parameters vs Accuracy (After Removing a Layer)')
+plt.xlabel('Percentage Drop in Parameters')
+plt.ylabel('Accuracy (%)')
 plt.grid(True)
-
 plt.show()
-print(f"\nTotal learnable parameters (after reduction): {total_params}")
