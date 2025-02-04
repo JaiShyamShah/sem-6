@@ -1,85 +1,103 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-
-# Define the CNN model
 class CNNClassifier(nn.Module):
     def __init__(self):
         super(CNNClassifier, self).__init__()
-        # Define the layers
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)  # Conv layer
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # Conv layer
-        self.pool = nn.MaxPool2d(2, 2)  # MaxPooling layer
-        self.fc1 = nn.Linear(64 * 7 * 7, 128)  # Fully connected layer
-        self.fc2 = nn.Linear(128, 10)  # Output layer for 10 classes
+        self.net = nn.Sequential(
+            nn.Conv2d(1, 64, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2), stride=2),
+            nn.Conv2d(64, 128, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2), stride=2),
+            nn.Conv2d(128, 64, kernel_size=3),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2), stride=2)
+        )
+        self.classification_head = nn.Sequential(
+            nn.Linear(64, 20, bias=True),
+            nn.ReLU(),
+            nn.Linear(20, 10, bias=True)
+        )
 
     def forward(self, x):
-        x = self.pool(torch.relu(self.conv1(x)))  # First convolution + relu + pooling
-        x = self.pool(torch.relu(self.conv2(x)))  # Second convolution + relu + pooling
-        x = x.view(-1, 64 * 7 * 7)  # Flatten the output from the conv layers
-        x = torch.relu(self.fc1(x))  # Fully connected layer with ReLU
-        x = self.fc2(x)  # Output layer
-        return x
 
+        features = self.net(x)
+        features = features.view(features.size(0), -1)
+        return self.classification_head(features)
 
-# Load the MNIST dataset
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+])
+
 train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-# Initialize the model, loss function, and optimizer
 model = CNNClassifier()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-epochs=5
-# Training loop
-for epoch in range(epochs):  # Run for 5 epochs
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+def train(model, train_loader, criterion, optimizer, epochs=5):
     model.train()
-    total_loss = 0
-    total_correct = 0
-    total_samples = 0
-    for inputs, labels in train_loader:
-        optimizer.zero_grad()  # Clear the gradients
-        outputs = model(inputs)  # Forward pass
-        loss = criterion(outputs, labels)  # Compute the loss
-        loss.backward()  # Backpropagation
-        optimizer.step()  # Update weights
+    for epoch in range(epochs):
+        running_loss = 0.0
+        for images, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
 
-        total_loss += loss.item()
-        _, predicted = torch.max(outputs, 1)
-        total_correct += (predicted == labels).sum().item()
-        total_samples += labels.size(0)
+        print(f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss / len(train_loader)}")
 
-    accuracy = (total_correct / total_samples) * 100
-    print(f'Epoch [{epoch + 1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}, Accuracy: {accuracy:.2f}%')
+def evaluate(model, test_loader):
+    model.eval()
+    all_preds = []
+    all_labels = []
 
-# Evaluate the model on the test set
-model.eval()
-total_correct = 0
-total_samples = 0
-with torch.no_grad():  # Disable gradient computation for evaluation
-    for inputs, labels in test_loader:
-        outputs = model(inputs)
-        _, predicted = torch.max(outputs, 1)
-        total_correct += (predicted == labels).sum().item()
-        total_samples += labels.size(0)
+    with torch.no_grad():
+        for images, labels in test_loader:
+            outputs = model(images)
+            _, preds = torch.max(outputs, 1)
+            all_preds.append(preds)
+            all_labels.append(labels)
 
-accuracy = (total_correct / total_samples) * 100
-print(f'Test Accuracy: {accuracy:.2f}%')
+    all_preds = torch.cat(all_preds)
+    all_labels = torch.cat(all_labels)
 
-print("\nCNN model parameters:")
-# Assuming model is your CNNClassifier instance
-for name, param in model.named_parameters():
-    print(f"Parameter name: {name}, Shape: {param.shape}")
+    cm = confusion_matrix(all_labels.numpy(), all_preds.numpy())
 
-# To calculate the total number of learnable parameters
-total_params = sum(p.numel() for p in model.parameters())
-print(f"\nTotal learnable parameters: {total_params}")
+    return cm
+
+def plot_confusion_matrix(cm, classes):
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+train(model, train_loader, criterion, optimizer, epochs=5)
+
+conf_matrix = evaluate(model, test_loader)
+
+plot_confusion_matrix(conf_matrix, classes=[str(i) for i in range(10)])
+
+num_params = count_parameters(model)
+print(f"\nNumber of learnable parameters in the model: {num_params}")
