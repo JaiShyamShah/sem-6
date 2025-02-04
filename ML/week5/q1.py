@@ -1,3 +1,5 @@
+import torch
+import torch.nn.functional as F
 # Define the input image (6x6)
 image = torch.rand(6, 6)
 print("image=\n", image)
