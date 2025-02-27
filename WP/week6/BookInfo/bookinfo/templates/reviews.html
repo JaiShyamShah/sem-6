@@ -1,0 +1,16 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews</title>
+    <link rel="stylesheet" href="{% static 'bookinfo/styles.css' %}">
+</head>
+<body>
+    <h1>Book Reviews</h1>
+    <p>"A mesmerizing journey from start to finish!" - Reviewer A</p>
+    <p>"An inspiring tale with memorable characters." - Reviewer B</p>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>
+

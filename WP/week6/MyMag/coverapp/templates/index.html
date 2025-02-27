@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Magazine Cover Generator</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'coverapp/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Magazine Cover Generator</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="image">Select Cover Image:</label>
+                <select name="image" id="image">
+                    <option value="cover1.jpg">Cover 1</option>
+                    <option value="cover2.jpg">Cover 2</option>
+                    <option value="cover3.jpg">Cover 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bg_color">Background Color:</label>
+                <input type="color" id="bg_color" name="bg_color" value="#ffffff">
+            </div>
+            <div class="form-group">
+                <label for="font_size">Font Size (px):</label>
+                <input type="number" id="font_size" name="font_size" value="24">
+            </div>
+            <div class="form-group">
+                <label for="font_color">Font Color:</label>
+                <input type="color" id="font_color" name="font_color" value="#000000">
+            </div>
+            <div class="form-group">
+                <label for="font_family">Font Family:</label>
+                <select name="font_family" id="font_family">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="message">Magazine Title/Message:</label>
+                <input type="text" id="message" name="message" placeholder="Enter your magazine title/message" required>
+            </div>
+            <button type="submit">Generate Cover</button>
+        </form>
+        
+        {% if message %}
+        <!-- Magazine Cover Display -->
+        <div class="magazine-cover" style="background-color: {{ bg_color }};">
+            <img src="{% static 'coverapp/images/' %}{{ image }}" alt="Magazine Cover Image">
+            <div class="cover-text" style="font-size: {{ font_size }}px; color: {{ font_color }}; font-family: {{ font_family }};">
+                {{ message }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+

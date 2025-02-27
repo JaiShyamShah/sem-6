@@ -1,0 +1,17 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Publisher Info</title>
+    <link rel="stylesheet" href="{% static 'bookinfo/styles.css' %}">
+</head>
+<body>
+    <h1>Publisher Information</h1>
+    <p><strong>Publisher:</strong> ABC Publishing House</p>
+    <p><strong>Address:</strong> 123 Main Street, Anytown, Country</p>
+    <p><strong>Contact:</strong> info@abcpublishing.com</p>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>
+

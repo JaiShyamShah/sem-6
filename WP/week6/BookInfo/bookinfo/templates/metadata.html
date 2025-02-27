@@ -1,0 +1,18 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metadata</title>
+    <link rel="stylesheet" href="{% static 'bookinfo/styles.css' %}">
+</head>
+<body>
+    <h1>Book Metadata</h1>
+    <p><strong>Title:</strong> The Great Adventure</p>
+    <p><strong>Author:</strong> Jane Doe</p>
+    <p><strong>ISBN:</strong> 123-4567890123</p>
+    <p><strong>Published:</strong> 2025</p>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>
+

@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Information</title>
+    <link rel="stylesheet" href="{% static 'bookinfo/styles.css' %}">
+</head>
+<body>
+    <h1>Welcome to the Book Information Page</h1>
+    <!-- Display the book cover -->
+    <img src="{% static 'bookinfo/images/book_cover.jpg' %}" alt="Book Cover" style="width:300px;height:auto;">
+
+    <!-- Navigation links -->
+    <nav>
+        <ul>
+            <li><a href="{% url 'metadata' %}">Metadata</a></li>
+            <li><a href="{% url 'reviews' %}">Reviews</a></li>
+            <li><a href="{% url 'publisher' %}">Publisher Info</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
+
